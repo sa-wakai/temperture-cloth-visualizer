@@ -1,0 +1,58 @@
+import type { ChildPattern } from './types';
+
+export const DEFAULT_PATTERNS: ChildPattern[] = [
+  {
+    id: 'p1',
+    name: '暑い日セット',
+    description: 'ノースリーブ肌着のみ',
+    tempMin: 28,
+    tempMax: 99,
+    humidityMin: 0,
+    humidityMax: 100,
+  },
+  {
+    id: 'p2',
+    name: '夏の普通セット',
+    description: '肌着 + 半袖ロンパース',
+    tempMin: 24,
+    tempMax: 28,
+    humidityMin: 0,
+    humidityMax: 70,
+  },
+  {
+    id: 'p3',
+    name: '蒸し暑い日セット',
+    description: 'ノースリーブ肌着 + 半袖',
+    tempMin: 24,
+    tempMax: 28,
+    humidityMin: 70,
+    humidityMax: 100,
+  },
+  {
+    id: 'p4',
+    name: '快適セット',
+    description: '肌着 + 長袖ロンパース',
+    tempMin: 20,
+    tempMax: 24,
+    humidityMin: 0,
+    humidityMax: 100,
+  },
+  {
+    id: 'p5',
+    name: '肌寒いセット',
+    description: '肌着 + 長袖シャツ + パンツ + 靴下',
+    tempMin: 16,
+    tempMax: 20,
+    humidityMin: 0,
+    humidityMax: 100,
+  },
+  {
+    id: 'p6',
+    name: '寒い日セット',
+    description: '肌着 + 長袖シャツ + パンツ + 靴下 + カーディガン',
+    tempMin: 0,
+    tempMax: 16,
+    humidityMin: 0,
+    humidityMax: 100,
+  },
+];
