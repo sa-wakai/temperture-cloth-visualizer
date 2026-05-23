@@ -2,26 +2,51 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 import type { ReactNode } from 'react';
 import type { WardrobeItem, ChildPattern } from '../lib/types';
 import { storageGet, storageSet } from '../lib/storage';
-import { DEFAULT_PATTERNS } from '../lib/defaults';
+import { DEFAULT_PATTERNS, DEFAULT_CHILD_SLEEP_PATTERNS, DEFAULT_ADULT_SLEEP_PATTERNS } from '../lib/defaults';
 
 const WARDROBE_KEY = 'wardrobeItems';
 const PATTERNS_KEY = 'childPatterns';
+const CHILD_SLEEP_KEY = 'childSleepPatterns';
+const ADULT_SLEEP_KEY = 'adultSleepPatterns';
 const SEEDED_KEY = 'defaultsSeeded';
+const SLEEP_SEEDED_KEY = 'sleepDefaultsSeeded';
 
 interface WardrobeContextValue {
   wardrobeItems: WardrobeItem[];
   childPatterns: ChildPattern[];
+  childSleepPatterns: ChildPattern[];
+  adultSleepPatterns: ChildPattern[];
   addWardrobeItem: (item: WardrobeItem) => boolean;
   updateWardrobeItem: (item: WardrobeItem) => boolean;
   deleteWardrobeItem: (id: string) => boolean;
   addChildPattern: (pattern: ChildPattern) => boolean;
   updateChildPattern: (pattern: ChildPattern) => boolean;
   deleteChildPattern: (id: string) => boolean;
+  addChildSleepPattern: (pattern: ChildPattern) => boolean;
+  updateChildSleepPattern: (pattern: ChildPattern) => boolean;
+  deleteChildSleepPattern: (id: string) => boolean;
+  addAdultSleepPattern: (pattern: ChildPattern) => boolean;
+  updateAdultSleepPattern: (pattern: ChildPattern) => boolean;
+  deleteAdultSleepPattern: (id: string) => boolean;
   exportData: () => string;
   importData: (json: string) => boolean;
 }
 
 const WardrobeContext = createContext<WardrobeContextValue | null>(null);
+
+function seedSleepPatterns() {
+  const seeded = storageGet<boolean>(SLEEP_SEEDED_KEY);
+  if (!seeded) {
+    storageSet(CHILD_SLEEP_KEY, DEFAULT_CHILD_SLEEP_PATTERNS);
+    storageSet(ADULT_SLEEP_KEY, DEFAULT_ADULT_SLEEP_PATTERNS);
+    storageSet(SLEEP_SEEDED_KEY, true);
+    return { child: DEFAULT_CHILD_SLEEP_PATTERNS, adult: DEFAULT_ADULT_SLEEP_PATTERNS };
+  }
+  return {
+    child: storageGet<ChildPattern[]>(CHILD_SLEEP_KEY) ?? [],
+    adult: storageGet<ChildPattern[]>(ADULT_SLEEP_KEY) ?? [],
+  };
+}
 
 export function WardrobeProvider({ children }: { children: ReactNode }) {
   const [wardrobeItems, setWardrobeItems] = useState<WardrobeItem[]>(() => {
@@ -31,7 +56,6 @@ export function WardrobeProvider({ children }: { children: ReactNode }) {
   const [childPatterns, setChildPatterns] = useState<ChildPattern[]>(() => {
     const saved = storageGet<ChildPattern[]>(PATTERNS_KEY);
     if (saved !== null) return saved;
-    // Seed defaults on first launch
     const seeded = storageGet<boolean>(SEEDED_KEY);
     if (!seeded) {
       storageSet(PATTERNS_KEY, DEFAULT_PATTERNS);
@@ -41,7 +65,14 @@ export function WardrobeProvider({ children }: { children: ReactNode }) {
     return [];
   });
 
-  // Request persistent storage on init
+  const [childSleepPatterns, setChildSleepPatterns] = useState<ChildPattern[]>(() => {
+    return seedSleepPatterns().child;
+  });
+
+  const [adultSleepPatterns, setAdultSleepPatterns] = useState<ChildPattern[]>(() => {
+    return storageGet<ChildPattern[]>(ADULT_SLEEP_KEY) ?? DEFAULT_ADULT_SLEEP_PATTERNS;
+  });
+
   useEffect(() => {
     if (navigator.storage?.persist) {
       navigator.storage.persist().catch(() => { /* ignore */ });
@@ -90,22 +121,80 @@ export function WardrobeProvider({ children }: { children: ReactNode }) {
     return ok;
   }, [childPatterns]);
 
+  const addChildSleepPattern = useCallback((pattern: ChildPattern): boolean => {
+    const next = [...childSleepPatterns, pattern];
+    const ok = storageSet(CHILD_SLEEP_KEY, next);
+    if (ok) setChildSleepPatterns(next);
+    return ok;
+  }, [childSleepPatterns]);
+
+  const updateChildSleepPattern = useCallback((pattern: ChildPattern): boolean => {
+    const next = childSleepPatterns.map(p => p.id === pattern.id ? pattern : p);
+    const ok = storageSet(CHILD_SLEEP_KEY, next);
+    if (ok) setChildSleepPatterns(next);
+    return ok;
+  }, [childSleepPatterns]);
+
+  const deleteChildSleepPattern = useCallback((id: string): boolean => {
+    const next = childSleepPatterns.filter(p => p.id !== id);
+    const ok = storageSet(CHILD_SLEEP_KEY, next);
+    if (ok) setChildSleepPatterns(next);
+    return ok;
+  }, [childSleepPatterns]);
+
+  const addAdultSleepPattern = useCallback((pattern: ChildPattern): boolean => {
+    const next = [...adultSleepPatterns, pattern];
+    const ok = storageSet(ADULT_SLEEP_KEY, next);
+    if (ok) setAdultSleepPatterns(next);
+    return ok;
+  }, [adultSleepPatterns]);
+
+  const updateAdultSleepPattern = useCallback((pattern: ChildPattern): boolean => {
+    const next = adultSleepPatterns.map(p => p.id === pattern.id ? pattern : p);
+    const ok = storageSet(ADULT_SLEEP_KEY, next);
+    if (ok) setAdultSleepPatterns(next);
+    return ok;
+  }, [adultSleepPatterns]);
+
+  const deleteAdultSleepPattern = useCallback((id: string): boolean => {
+    const next = adultSleepPatterns.filter(p => p.id !== id);
+    const ok = storageSet(ADULT_SLEEP_KEY, next);
+    if (ok) setAdultSleepPatterns(next);
+    return ok;
+  }, [adultSleepPatterns]);
+
   const exportData = useCallback((): string => {
-    return JSON.stringify({ wardrobeItems, childPatterns }, null, 2);
-  }, [wardrobeItems, childPatterns]);
+    return JSON.stringify({
+      wardrobeItems,
+      childPatterns,
+      childSleepPatterns,
+      adultSleepPatterns,
+    }, null, 2);
+  }, [wardrobeItems, childPatterns, childSleepPatterns, adultSleepPatterns]);
 
   const importData = useCallback((json: string): boolean => {
     try {
-      const data = JSON.parse(json) as { wardrobeItems: WardrobeItem[]; childPatterns: ChildPattern[] };
+      const data = JSON.parse(json) as {
+        wardrobeItems: WardrobeItem[];
+        childPatterns: ChildPattern[];
+        childSleepPatterns?: ChildPattern[];
+        adultSleepPatterns?: ChildPattern[];
+      };
       if (!Array.isArray(data.wardrobeItems) || !Array.isArray(data.childPatterns)) return false;
       const ok1 = storageSet(WARDROBE_KEY, data.wardrobeItems);
       const ok2 = storageSet(PATTERNS_KEY, data.childPatterns);
-      if (ok1 && ok2) {
-        setWardrobeItems(data.wardrobeItems);
-        setChildPatterns(data.childPatterns);
-        return true;
+      if (!ok1 || !ok2) return false;
+      setWardrobeItems(data.wardrobeItems);
+      setChildPatterns(data.childPatterns);
+      if (Array.isArray(data.childSleepPatterns)) {
+        storageSet(CHILD_SLEEP_KEY, data.childSleepPatterns);
+        setChildSleepPatterns(data.childSleepPatterns);
       }
-      return false;
+      if (Array.isArray(data.adultSleepPatterns)) {
+        storageSet(ADULT_SLEEP_KEY, data.adultSleepPatterns);
+        setAdultSleepPatterns(data.adultSleepPatterns);
+      }
+      return true;
     } catch {
       return false;
     }
@@ -115,12 +204,20 @@ export function WardrobeProvider({ children }: { children: ReactNode }) {
     <WardrobeContext.Provider value={{
       wardrobeItems,
       childPatterns,
+      childSleepPatterns,
+      adultSleepPatterns,
       addWardrobeItem,
       updateWardrobeItem,
       deleteWardrobeItem,
       addChildPattern,
       updateChildPattern,
       deleteChildPattern,
+      addChildSleepPattern,
+      updateChildSleepPattern,
+      deleteChildSleepPattern,
+      addAdultSleepPattern,
+      updateAdultSleepPattern,
+      deleteAdultSleepPattern,
       exportData,
       importData,
     }}>

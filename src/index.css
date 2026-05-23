@@ -14,6 +14,11 @@
   --spacing-base: 16px;
   --touch-min: 44px;
 
+  --color-ac-hot-bg: #fef3c7;
+  --color-ac-hot-text: #b45309;
+  --color-ac-cold-bg: #dbeafe;
+  --color-ac-cold-text: #1d4ed8;
+
   color-scheme: light;
 }
 
@@ -505,4 +510,61 @@ h2 {
 .error-state-text {
   font-size: 18px;
   color: var(--color-text-secondary);
+}
+
+/* AC recommendation banner */
+.ac-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.ac-banner.hot {
+  background: var(--color-ac-hot-bg);
+  color: var(--color-ac-hot-text);
+}
+
+.ac-banner.cold {
+  background: var(--color-ac-cold-bg);
+  color: var(--color-ac-cold-text);
+}
+
+/* Sleep tab result layout */
+.sleep-results {
+  margin-top: 4px;
+}
+
+.sleep-results-divider {
+  height: 1px;
+  background: var(--color-divider);
+  margin: 4px 0;
+}
+
+.sleep-result-section {
+  padding: 12px 0;
+}
+
+.sleep-result-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-caption);
+  margin-bottom: 4px;
+}
+
+.sleep-result-section .pattern-result {
+  margin-top: 0;
+  padding: 0;
+  border-top: none;
+}
+
+.sleep-result-section .no-match {
+  margin-top: 4px;
+  font-size: 14px;
 }

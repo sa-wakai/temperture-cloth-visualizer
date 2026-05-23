@@ -1,5 +1,83 @@
 import type { ChildPattern } from './types';
 
+export const DEFAULT_CHILD_SLEEP_PATTERNS: ChildPattern[] = [
+  {
+    id: 'cs1',
+    name: '暑い夜',
+    description: '肌着のみ（ノースリーブ）',
+    tempMin: 27,
+    tempMax: 99,
+    humidityMin: 0,
+    humidityMax: 100,
+  },
+  {
+    id: 'cs2',
+    name: '夏の夜',
+    description: '肌着 + 半袖ロンパース',
+    tempMin: 21,
+    tempMax: 27,
+    humidityMin: 0,
+    humidityMax: 100,
+  },
+  {
+    id: 'cs3',
+    name: '快適な夜',
+    description: '肌着 + 長袖ロンパース',
+    tempMin: 16,
+    tempMax: 21,
+    humidityMin: 0,
+    humidityMax: 100,
+  },
+  {
+    id: 'cs4',
+    name: '寒い夜',
+    description: '肌着 + 長袖ロンパース + スリーパー',
+    tempMin: 0,
+    tempMax: 16,
+    humidityMin: 0,
+    humidityMax: 100,
+  },
+];
+
+export const DEFAULT_ADULT_SLEEP_PATTERNS: ChildPattern[] = [
+  {
+    id: 'as1',
+    name: '暑い夜',
+    description: '薄手半袖パジャマ',
+    tempMin: 27,
+    tempMax: 99,
+    humidityMin: 0,
+    humidityMax: 100,
+  },
+  {
+    id: 'as2',
+    name: '夏の夜',
+    description: '半袖パジャマ',
+    tempMin: 21,
+    tempMax: 27,
+    humidityMin: 0,
+    humidityMax: 100,
+  },
+  {
+    id: 'as3',
+    name: '快適な夜',
+    description: '長袖パジャマ',
+    tempMin: 16,
+    tempMax: 21,
+    humidityMin: 0,
+    humidityMax: 100,
+  },
+  {
+    id: 'as4',
+    name: '寒い夜',
+    description: '厚手パジャマ + 毛布',
+    tempMin: 0,
+    tempMax: 16,
+    humidityMin: 0,
+    humidityMax: 100,
+  },
+];
+
 export const DEFAULT_PATTERNS: ChildPattern[] = [
   {
     id: 'p1',

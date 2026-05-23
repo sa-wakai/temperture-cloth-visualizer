@@ -303,12 +303,20 @@ export default function SetupScreen() {
   const {
     wardrobeItems,
     childPatterns,
+    childSleepPatterns,
+    adultSleepPatterns,
     addWardrobeItem,
     updateWardrobeItem,
     deleteWardrobeItem,
     addChildPattern,
     updateChildPattern,
     deleteChildPattern,
+    addChildSleepPattern,
+    updateChildSleepPattern,
+    deleteChildSleepPattern,
+    addAdultSleepPattern,
+    updateAdultSleepPattern,
+    deleteAdultSleepPattern,
     exportData,
     importData,
   } = useWardrobe();
@@ -317,7 +325,13 @@ export default function SetupScreen() {
 
   const [wardrobeForm, setWardrobeForm] = useState<{ open: boolean; editing?: WardrobeItem }>({ open: false });
   const [patternForm, setPatternForm] = useState<{ open: boolean; editing?: ChildPattern }>({ open: false });
-  const [confirmDelete, setConfirmDelete] = useState<{ type: 'wardrobe' | 'pattern'; id: string; name: string } | null>(null);
+  const [childSleepForm, setChildSleepForm] = useState<{ open: boolean; editing?: ChildPattern }>({ open: false });
+  const [adultSleepForm, setAdultSleepForm] = useState<{ open: boolean; editing?: ChildPattern }>({ open: false });
+  const [confirmDelete, setConfirmDelete] = useState<{
+    type: 'wardrobe' | 'pattern' | 'childSleep' | 'adultSleep';
+    id: string;
+    name: string;
+  } | null>(null);
 
   // ── Wardrobe handlers ──
 
@@ -360,14 +374,60 @@ export default function SetupScreen() {
     if (p) setConfirmDelete({ type: 'pattern', id, name: p.name });
   }
 
+  // ── Child sleep pattern handlers ──
+
+  function handleChildSleepSave(pattern: ChildPattern, overlap: ChildPattern | null) {
+    const ok = childSleepForm.editing
+      ? updateChildSleepPattern(pattern)
+      : addChildSleepPattern(pattern);
+    if (!ok) {
+      showToast('保存できませんでした — プライベートブラウジングモードを確認してください', 'error');
+    } else if (overlap) {
+      showToast(`「${overlap.name}」と条件が重複しています`, 'warning');
+    } else {
+      showToast('保存しました', 'success');
+    }
+    setChildSleepForm({ open: false });
+  }
+
+  function handleChildSleepDelete(id: string) {
+    const p = childSleepPatterns.find(p => p.id === id);
+    if (p) setConfirmDelete({ type: 'childSleep', id, name: p.name });
+  }
+
+  // ── Adult sleep pattern handlers ──
+
+  function handleAdultSleepSave(pattern: ChildPattern, overlap: ChildPattern | null) {
+    const ok = adultSleepForm.editing
+      ? updateAdultSleepPattern(pattern)
+      : addAdultSleepPattern(pattern);
+    if (!ok) {
+      showToast('保存できませんでした — プライベートブラウジングモードを確認してください', 'error');
+    } else if (overlap) {
+      showToast(`「${overlap.name}」と条件が重複しています`, 'warning');
+    } else {
+      showToast('保存しました', 'success');
+    }
+    setAdultSleepForm({ open: false });
+  }
+
+  function handleAdultSleepDelete(id: string) {
+    const p = adultSleepPatterns.find(p => p.id === id);
+    if (p) setConfirmDelete({ type: 'adultSleep', id, name: p.name });
+  }
+
   // ── Confirm delete ──
 
   function executeDelete() {
     if (!confirmDelete) return;
     if (confirmDelete.type === 'wardrobe') {
       deleteWardrobeItem(confirmDelete.id);
-    } else {
+    } else if (confirmDelete.type === 'pattern') {
       deleteChildPattern(confirmDelete.id);
+    } else if (confirmDelete.type === 'childSleep') {
+      deleteChildSleepPattern(confirmDelete.id);
+    } else {
+      deleteAdultSleepPattern(confirmDelete.id);
     }
     setConfirmDelete(null);
   }
@@ -460,6 +520,70 @@ export default function SetupScreen() {
         )}
       </div>
 
+      {/* Child sleep patterns section */}
+      <div className="section">
+        <div className="section-header">
+          <h2>「就寝」子供のパターン</h2>
+          <button className="btn-outlined" style={{ padding: '0 14px', minHeight: 36, fontSize: 14 }}
+            onClick={() => setChildSleepForm({ open: true })}>
+            + 追加
+          </button>
+        </div>
+
+        {childSleepPatterns.length === 0 ? (
+          <p className="empty-state">パターンがまだ登録されていません</p>
+        ) : (
+          childSleepPatterns.map(p => (
+            <div key={p.id} className="list-item">
+              <div className="list-item-main">
+                <div className="list-item-name">{p.name}</div>
+                <div className="list-item-meta">
+                  {p.tempMin}–{p.tempMax}°C · 湿度{p.humidityMin}–{p.humidityMax}%
+                </div>
+              </div>
+              <div className="list-item-actions">
+                <button className="btn-icon" aria-label="編集"
+                  onClick={() => setChildSleepForm({ open: true, editing: p })}>✏️</button>
+                <button className="btn-icon" aria-label="削除"
+                  onClick={() => handleChildSleepDelete(p.id)}>🗑</button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Adult sleep patterns section */}
+      <div className="section">
+        <div className="section-header">
+          <h2>「就寝」自分のパターン</h2>
+          <button className="btn-outlined" style={{ padding: '0 14px', minHeight: 36, fontSize: 14 }}
+            onClick={() => setAdultSleepForm({ open: true })}>
+            + 追加
+          </button>
+        </div>
+
+        {adultSleepPatterns.length === 0 ? (
+          <p className="empty-state">パターンがまだ登録されていません</p>
+        ) : (
+          adultSleepPatterns.map(p => (
+            <div key={p.id} className="list-item">
+              <div className="list-item-main">
+                <div className="list-item-name">{p.name}</div>
+                <div className="list-item-meta">
+                  {p.tempMin}–{p.tempMax}°C · 湿度{p.humidityMin}–{p.humidityMax}%
+                </div>
+              </div>
+              <div className="list-item-actions">
+                <button className="btn-icon" aria-label="編集"
+                  onClick={() => setAdultSleepForm({ open: true, editing: p })}>✏️</button>
+                <button className="btn-icon" aria-label="削除"
+                  onClick={() => handleAdultSleepDelete(p.id)}>🗑</button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
       {/* Export / Import */}
       <div className="section">
         <h2>データ管理</h2>
@@ -481,6 +605,24 @@ export default function SetupScreen() {
           existingPatterns={childPatterns}
           onSave={handlePatternSave}
           onClose={() => setPatternForm({ open: false })}
+        />
+      )}
+
+      {childSleepForm.open && (
+        <PatternForm
+          initial={childSleepForm.editing}
+          existingPatterns={childSleepPatterns}
+          onSave={handleChildSleepSave}
+          onClose={() => setChildSleepForm({ open: false })}
+        />
+      )}
+
+      {adultSleepForm.open && (
+        <PatternForm
+          initial={adultSleepForm.editing}
+          existingPatterns={adultSleepPatterns}
+          onSave={handleAdultSleepSave}
+          onClose={() => setAdultSleepForm({ open: false })}
         />
       )}
 

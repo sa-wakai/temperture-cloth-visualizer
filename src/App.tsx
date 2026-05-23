@@ -5,6 +5,7 @@ import { WardrobeProvider } from './context/WardrobeContext';
 
 const OutdoorTab = lazy(() => import('./pages/OutdoorTab'));
 const IndoorTab = lazy(() => import('./pages/IndoorTab'));
+const SleepTab = lazy(() => import('./pages/SleepTab'));
 const SetupScreen = lazy(() => import('./pages/SetupScreen'));
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
@@ -78,6 +79,12 @@ function TabsLayout() {
         >
           子供の室内
         </NavLink>
+        <NavLink
+          to="/sleep"
+          className={({ isActive }) => `tab-bar-btn${isActive ? ' active' : ''}`}
+        >
+          就寝
+        </NavLink>
       </nav>
 
       <Suspense fallback={<div className="skeleton" style={{ marginTop: 32 }} />}>
@@ -91,6 +98,7 @@ function TabsLayout() {
             }
           />
           <Route path="/indoor" element={<IndoorTab />} />
+          <Route path="/sleep" element={<SleepTab />} />
           <Route path="*" element={<Navigate to="/outdoor" replace />} />
         </Routes>
       </Suspense>
