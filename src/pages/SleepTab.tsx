@@ -96,6 +96,7 @@ export default function SleepTab() {
   return (
     <div style={{ paddingTop: 24, paddingBottom: 24, flex: 1 }}>
       <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className="tablet-form-row">
         <div className="field">
           <label htmlFor="sleepRoomTemp">室温 (°C)</label>
           <input
@@ -124,6 +125,7 @@ export default function SleepTab() {
             placeholder="例：60"
           />
           {errors.humidity && <span className="field-error">{errors.humidity}</span>}
+        </div>
         </div>
 
         <button type="submit" className="btn-primary">確認</button>
